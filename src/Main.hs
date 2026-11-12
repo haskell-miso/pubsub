@@ -71,7 +71,7 @@ server = component () update_ $ \() -> vfrag
   , mount_ (client_ "client 1")
   , mount_ (client_ "client 2")
   ] where
-      update_ :: Action -> Effect ROOT ParentModel Action
+      update_ :: Action -> Effect () () ParentModel Action
       update_ = \case
         Init -> do
           io_ $ consoleLog ("parent subscribing")
@@ -88,7 +88,7 @@ server = component () update_ $ \() -> vfrag
           io_ (publish arithmetic Decrement)
         _ -> pure ()
 -----------------------------------------------------------------------------
-client_ :: MisoString -> Component ParentModel Int Action
+client_ :: MisoString -> Component () () Int Action
 client_ name = (clientComponent name)
   { mount = Just Subscribe
   , mailbox = receiveMail
@@ -98,14 +98,14 @@ receiveMail :: Value -> Maybe Action
 receiveMail (String "welcome") = Just Welcomed
 receiveMail _ = Just Oops
 -----------------------------------------------------------------------------
-clientComponent :: MisoString -> Component () Int Action
+clientComponent :: MisoString -> Component () () Int Action
 clientComponent name = component 0 update_ $ \m -> vfrag
   [ br_ []
   , text (name <> " : " <> ms (m ^. _id))
   , button_ [ onClick Unsubscribe ] [ "unsubscribe" ]
   , button_ [ onClick Subscribe ] [ "subscribe" ]
   ] where
-      update_ :: Action -> Effect () Int Action
+      update_ :: Action -> Effect () () Int Action
       update_ = \case
         AddOne -> do
           _id += 1
